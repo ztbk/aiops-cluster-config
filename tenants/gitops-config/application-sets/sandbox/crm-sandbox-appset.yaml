@@ -1,0 +1,36 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: crm-sandbox-appset
+  namespace: openshift-gitops
+spec:
+  generators:
+    - git:
+        repoURL: 'http://tfsmaster:8080/tfs/DefaultCollection/MLOps/_git/MLOps'
+        revision: second
+        directories:
+          - path: 'tenants/overlays/sandbox/crm/*'
+  template:
+    metadata:
+      name: 'crm-{{path.basename}}-sandbox'
+    spec:
+      project: 'crm'
+      source:
+        repoURL: 'http://tfsmaster:8080/tfs/DefaultCollection/MLOps/_git/MLOps'
+        targetRevision: second
+        path: 'tenants/overlays/sandbox/crm/{{path.basename}}'
+      destination:
+        server: 'https://kubernetes.default.svc'
+        namespace: 'crm-{{path.basename}}'
+      syncPolicy:
+        syncOptions:
+        - RespectIgnoreDifferences=true
+        automated:
+          selfHeal: true
+          prune: true
+      ignoreDifferences:
+      - group: project.openshift.io
+        kind: Project
+        jsonPointers:
+          - /metadata/annotations
+          - /metadata/labels

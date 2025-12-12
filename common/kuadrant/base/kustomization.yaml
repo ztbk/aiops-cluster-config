@@ -1,0 +1,27 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: openshift-operators
+
+commonLabels:
+  component: authorino-operator
+
+resources:
+#- namespace.yaml
+- subscription.yaml
+- ../../installplan-approver-job/base
+
+patches:
+- patch: |-
+    - op: replace
+      path: "/spec/template/spec/containers/0/env"
+      value:
+      - name: NAMESPACE
+        value: "openshift-operators"
+    - op: replace
+      path: "/metadata/name"
+      value: "authorino-operator-installplan-approver"
+  target:
+    kind: Job
+    name: installplan-approver

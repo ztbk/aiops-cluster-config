@@ -1,0 +1,41 @@
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: minio-console
+  labels:
+    app: minio
+  annotations:
+    argocd.argoproj.io/sync-wave: "4"
+    openshift.io/host.generated: 'true'
+spec:
+  port:
+    targetPort: console
+  tls:
+    termination: reencrypt
+    insecureEdgeTerminationPolicy: Redirect
+  to:
+    kind: Service
+    name: minio
+    weight: 100
+  wildcardPolicy: None
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: minio-s3
+  labels:
+    app: minio
+  annotations:
+    argocd.argoproj.io/sync-wave: "4"
+spec:
+  port:
+    targetPort: api
+  tls:
+    insecureEdgeTerminationPolicy: Redirect
+    termination: reencrypt
+  to:
+    kind: Service
+    name: minio
+    weight: 100
+  wildcardPolicy: None

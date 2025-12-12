@@ -1,0 +1,36 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: earlywarning-sandbox-appset
+  namespace: openshift-gitops
+spec:
+  generators:
+    - git:
+        repoURL: 'http://tfsmaster:8080/tfs/DefaultCollection/MLOps/_git/MLOps'
+        revision: second
+        directories:
+          - path: 'tenants/overlays/sandbox/earlywarning/*'
+  template:
+    metadata:
+      name: 'earlywarning-{{path.basename}}-sandbox'
+    spec:
+      project: 'earlywarning'
+      source:
+        repoURL: 'http://tfsmaster:8080/tfs/DefaultCollection/MLOps/_git/MLOps'
+        targetRevision: second
+        path: 'tenants/overlays/sandbox/earlywarning/{{path.basename}}'
+      destination:
+        server: 'https://kubernetes.default.svc'
+        namespace: 'earlywarning-{{path.basename}}'
+      syncPolicy:
+        syncOptions:
+        - RespectIgnoreDifferences=true
+        automated:
+          selfHeal: true
+          prune: true
+      ignoreDifferences:
+      - group: project.openshift.io
+        kind: Project
+        jsonPointers:
+          - /metadata/annotations
+          - /metadata/labels

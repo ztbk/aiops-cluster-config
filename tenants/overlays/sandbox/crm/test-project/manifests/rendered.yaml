@@ -1,0 +1,478 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: '83'
+  name: test-project-sa
+  namespace: crm-test-project
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: '83'
+  name: ds-pipelines-envoy-proxy-tls-dspa
+  namespace: crm-test-project
+---
+apiVersion: v1
+data:
+  viewer-pod-template.json: "\n                    {\n                        \"spec\"\
+    : {\n                            \"serviceAccountName\": \"crm-user\"\n      \
+    \                  }\n                    }\n                    "
+kind: ConfigMap
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: '83'
+  name: ds-pipeline-ui-configmap
+  namespace: crm-test-project
+---
+apiVersion: v1
+data:
+  artifactRepository: "\n                    archiveLogs: false\n                \
+    \    s3:\n                      endpoint: \"http://minio.minio.svc:9000:\"\n \
+    \                     bucket: \"mlpipeline-test-project\"\n                  \
+    \    keyFormat: \"artifacts/{{workflow.name}}/{{workflow.creationTimestamp.Y}}/{{workflow.creationTimestamp.m}}/{{workflow.creationTimestamp.d}}/{{pod.name}}\"\
+    \n                      insecure: false\n                      accessKeySecret:\n\
+    \                        name: \"ds-pipeline-extobjstor-creds\"\n            \
+    \            key: \"accesskey\"\n                      secretKeySecret:\n    \
+    \                    name: \"ds-pipeline-extobjstor-creds\"\n                \
+    \        key: \"secretkey\"\n                    containerRuntimeExecutor: emissary\n\
+    \                    executor: |\n                        imagePullPolicy: IfNotPresent\n\
+    \                    "
+  containerRuntimeExecutor: emissary
+  executor: 'imagePullPolicy: IfNotPresent  # TODO
+
+    '
+kind: ConfigMap
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: '83'
+  name: custom-workflow-controller-configmap
+  namespace: crm-test-project
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: '86'
+    openshift.io/description: Workbench Storage
+    openshift.io/display-name: test-project-tensorflow-test-project-notebook-workbench-pvc
+  labels:
+    opendatahub.io/dashboard: 'true'
+  name: test-project-tensorflow-test-project-notebook-workbench-pvc
+  namespace: crm-test-project
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: '83'
+  name: ml-pipeline-role
+  namespace: crm-test-project
+rules:
+- apiGroups:
+  - tekton.dev
+  resources:
+  - pipelines
+  - pipelineruns
+  - tasks
+  - taskruns
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - argoproj.io
+  resources:
+  - workflows
+  - workflowtemplates
+  - cronworkflows
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - kubeflow.org
+  resources:
+  - scheduledworkflows
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - ''
+  resources:
+  - persistentvolumeclaims
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - bind
+  - patch
+  - delete
+- apiGroups:
+  - ''
+  resources:
+  - jobs
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - bind
+  - patch
+  - delete
+- apiGroups:
+  - ''
+  resources:
+  - secrets
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - bitnami.com
+  resources:
+  - sealedsecrets
+  verbs:
+  - get
+  - list
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: '83'
+  name: ds-pipeline-extdb-role
+  namespace: crm-test-project
+rules:
+- apiGroups:
+  - ''
+  resources:
+  - secrets
+  verbs:
+  - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: '83'
+  name: ml-pipeline-rolebinding
+  namespace: crm-test-project
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: ml-pipeline-role
+subjects:
+- kind: ServiceAccount
+  name: test-project-sa
+  namespace: crm-test-project
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: '83'
+  name: ds-pipeline-extdb-rolebinding
+  namespace: crm-test-project
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: ds-pipeline-extdb-role
+subjects:
+- kind: ServiceAccount
+  name: test-project-sa
+  namespace: crm-test-project
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: '86'
+  name: notebook-rolebinding
+  namespace: crm-test-project
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: ml-pipeline-role
+subjects:
+- kind: ServiceAccount
+  name: test-project-notebook
+  namespace: crm-test-project
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: '86'
+  name: notebook-extdb-rolebinding
+  namespace: crm-test-project
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: ds-pipeline-extdb-role
+subjects:
+- kind: ServiceAccount
+  name: test-project-notebook
+  namespace: crm-test-project
+---
+apiVersion: datasciencepipelinesapplications.opendatahub.io/v1alpha1
+kind: DataSciencePipelinesApplication
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: '85'
+  name: dspa
+  namespace: crm-test-project
+spec:
+  apiServer:
+    applyTektonCustomResource: true
+    archiveLogs: true
+    argoDriverImage: quay.io/org/kfp-driver:latest
+    argoLauncherImage: quay.io/org/kfp-launcher:latest
+    artifactImage: quay.io/opendatahub/ds-pipelines-artifact-manager:latest
+    autoUpdatePipelineDefaultVersion: true
+    cABundle:
+      configMapKey: ca.crt
+      configMapName: kube-root-ca.crt
+    cacheImage: registry.redhat.io/ubi8/ubi-minimal@sha256:5d2d4d4dbec470f8ffb679915e2a8ae25ad754cd9193fa966deee1ecb7b3ee00
+    collectMetrics: true
+    dbConfigConMaxLifetimeSec: 120
+    deploy: true
+    image: quay.io/opendatahub/ds-pipelines-api-server:latest
+    injectDefaultScript: true
+    moveResultsImage: registry.redhat.io/ubi8/ubi-micro@sha256:396baed3d689157d96aa7d8988fdfea7eb36684c8335eb391cf1952573e689c1
+    resources:
+      limits:
+        cpu: 500m
+        memory: 1Gi
+      requests:
+        cpu: 250m
+        memory: 500Mi
+    stripEOF: true
+    terminateStatus: Cancelled
+    trackArtifacts: true
+  database:
+    customExtraParams: '{"tls":"false"}'
+    disableHealthCheck: false
+    mariadb:
+      deploy: true
+      pipelineDBName: mlpipeline
+      pvcSize: 10Gi
+      username: mlpipeline
+  dspVersion: v2
+  mlmd:
+    deploy: true
+    envoy:
+      image: registry.redhat.io/openshift-service-mesh/proxyv2-rhel8@sha256:a744c1b386fd5e4f94e43543e829df1bfdd1b564137917372a11da06872f4bcb
+      resources:
+        limits:
+          cpu: 100m
+          memory: 256Mi
+        requests:
+          cpu: 100m
+          memory: 256Mi
+    grpc:
+      image: quay.io/opendatahub/mlmd-grpc-server:latest
+      port: '8080'
+      resources:
+        limits:
+          cpu: 100m
+          memory: 256Mi
+        requests:
+          cpu: 100m
+          memory: 256Mi
+  mlpipelineUI:
+    configMap: ds-pipeline-ui-configmap
+    deploy: true
+    image: quay.io/opendatahub/odh-ml-pipelines-frontend-container:beta-ui
+    resources:
+      limits:
+        cpu: 100m
+        memory: 256Mi
+      requests:
+        cpu: 100m
+        memory: 256Mi
+  objectStorage:
+    disableHealthCheck: false
+    externalStorage:
+      bucket: test-project
+      host: minio.minio.svc:9000
+      port: ''
+      s3CredentialsSecret:
+        accessKey: accesskey
+        secretKey: secretkey
+        secretName: ds-pipeline-extobjstor-creds
+      scheme: http
+      secure: false
+  persistenceAgent:
+    deploy: true
+    image: quay.io/opendatahub/ds-pipelines-persistenceagent:latest
+    numWorkers: 2
+    resources:
+      limits:
+        cpu: 250m
+        memory: 1Gi
+      requests:
+        cpu: 120m
+        memory: 500Mi
+  scheduledWorkflow:
+    cronScheduleTimezone: UTC
+    deploy: true
+    image: quay.io/opendatahub/ds-pipelines-scheduledworkflow:latest
+    resources:
+      limits:
+        cpu: 250m
+        memory: 250Mi
+      requests:
+        cpu: 120m
+        memory: 100Mi
+  workflowController:
+    deploy: true
+---
+apiVersion: kubeflow.org/v1
+kind: Notebook
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: '86'
+    notebooks.opendatahub.io/inject-oauth: 'true'
+    notebooks.opendatahub.io/last-image-selection: tensorflow:2023.2
+    notebooks.opendatahub.io/last-size-selection: Small
+    openshift.io/description: to-testing
+    openshift.io/display-name: crm-test-project
+  labels:
+    app: test-project
+    component: test-project-notebook-notebook-instance
+    opendatahub.io/dashboard: 'true'
+    opendatahub.io/odh-managed: 'true'
+    purpose: to-testing
+  name: test-project-notebook
+  namespace: crm-test-project
+spec:
+  template:
+    spec:
+      containers:
+      - env:
+        - name: NOTEBOOK_ARGS
+          value: --ServerApp.port=8888 --ServerApp.token='' --ServerApp.password=''
+            --ServerApp.base_url=/notebook/crm-test-project/test-project-notebook
+        - name: JUPYTER_IMAGE
+          value: image-registry.openshift-image-registry.svc:5000/redhat-ods-applications/tensorflow:2023.1
+        envFrom:
+        - secretRef:
+            name: ds-pipeline-extobjstor-creds
+        image: image-registry.openshift-image-registry.svc:5000/redhat-ods-applications/tensorflow:2023.1
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /notebook/crm-test-project/test-project-notebook/api
+            port: notebook-port
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          successThreshold: 1
+          timeoutSeconds: 1
+        name: test-project-notebook
+        ports:
+        - containerPort: 8888
+          name: notebook-port
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /notebook/crm-test-project/test-project-notebook/api
+            port: notebook-port
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          successThreshold: 1
+          timeoutSeconds: 1
+        resources:
+          limits:
+            cpu: '4'
+            memory: 16Gi
+          requests:
+            cpu: '2'
+            memory: 8Gi
+        volumeMounts:
+        - mountPath: /opt/app-root/src
+          name: test-project-notebook
+        - mountPath: /dev/shm
+          name: shm
+        workingDir: /opt/app-root/src
+      enableServiceLinks: false
+      serviceAccountName: test-project-notebook
+      volumes:
+      - name: test-project-notebook
+        persistentVolumeClaim:
+          claimName: test-project-tensorflow-test-project-notebook-workbench-pvc
+      - emptyDir:
+          medium: Memory
+          sizeLimit: 30Gi
+        name: shm
+---
+apiVersion: project.openshift.io/v1
+kind: Project
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-options: Replace=true,Force=true
+    argocd.argoproj.io/sync-wave: '82'
+    kubectl.kubernetes.io/last-applied-configuration: null
+    openshift.io/description: 'Auto-generated DataScienceProject for User: crm-user'
+    openshift.io/display-name: test-project
+    openshift.io/requester: crm-user
+  labels:
+    kubernetes.io/metadata.name: crm-test-project
+    modelmesh-enabled: 'true'
+    opendatahub.io/dashboard: 'true'
+  name: crm-test-project
+spec:
+  finalizers:
+  - kubernetes
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  creationTimestamp: null
+  name: ds-pipeline-extobjstor-creds
+  namespace: crm-test-project
+spec:
+  encryptedData:
+    accesskey: AgAtpxpRkEj88u+7kF0nxN/ZR1pBSaMETgXFWIsj9BNe0rW9WMiWwYGrYRjxr+tnuPx+R3B7oyotpE9TaLPn1WXmkkmAUxhmz1SXE3TfWYmD+zyfJrLGe3HCZBtkfDmE7Uqcu3ngM0jr1qvsuFDf0A+XIoUUBAvppGUv28mqqMwr7EWGvw5MBEYCuEsOYLV5VoW7eIfPj0X+w76WXrNeBebIMmmJ7SVSAc+om+5XBoyWcDBDeQ81YjMia9hUWt0PDvbw+YF5ML7bbb08ROYgFrLGiioCsLDkxMqzrOME4uN5qnDb8T11BM4YLReOYPVvYW7tjTq6EKfcsPTZE9jgrIvPYSXj990Z8nfqTtyWDWxBfURT2t1GTNmn7AfF9A+4JzwbHEJ0+ya0WmpXJSonhXw/ldoO6bMRl4+iWZSNEoqXeoASyc5O9cNwnNc0ii0VHL9Qyifx8V6cd/vWgzh2Zvi3FjdUAPuk2fo+a44TaNIzr9LtbL8v4eQOzgsLfhT2G0UNv040y5RsMTwTQ3dRk4b31yHTI35QrD0FBDTBjZ0reUqbrXecOtSTSYmY6EJFtUFIZaWxeCr4YQkEUJ4ChyPwfDnruiVNFuOTBYYFO+QOXuvF0fV6I27EEUvNu3b5K6+KbLmFviqvHMyp2AUoMtEXWpX0RvE5/7udIDVjjnaJa2rGM21O67bi6/FRXlqI9teYKGCKGnHO1yZcM4vMfoIw
+    secretkey: AgBGiJid1/ArCsTYcB+/h9O1xJ2UJGY8zbnuimjshvQJ7f3kFSPRMUwENXNnrWIWYRqB0HoPaQlW6TJ4agu5k63Q0lXNhjwxb6/WAqqGgxebgoL+iaw4w4cexpKpC/CqkIsONLlwfGHm1daOF+/RcAmJNNouBDuEQLGRpdTENSZKRs/4FznlHbATtWLO2CdhlenBSLJuLwTa84Saf5gX8Q06cf2sqXRcG/47e0Yrheejjg5XnFDo47dYGWrBqqWOBsDHw05iaLsT/hapjWfwbBaW8Ldxqr8YgPKSPH7NnMn2i6epQ2MzuX19f3WTObtKs+XC6XA22Aq6ByzeEruzdbmGJtTuWVCm9CSHJ5bawP1X95NqBroPQoxDcM8GoVPRsazaSDI11EgkACUTQw0ap+P+WC6GROuPWs+pEE9fbOxtFp0rwqpq5Q1AOIljKajGiB+4UDw4JczpcaTai9hm2IkUzpremlFHSr9ZfWXLSgRIGN5+q6xAUWIpPlhLH8pdTQBLTRgn0TGhdz7idI7IBkLtQ2WKNYWjVEpAsM4clcXLHXYPgrMg5YWtU29NI5lADfzpS9Kh00qjg6VCwTLjadQnidzYOnsAkbKQwum25g4cTTZrug0njqTCT8KcJVARfy1irDNY6uRv0CVCG6R9GMYjCNhR/3WKzamGvNcYdxiYUvaiUYSg8Qoi8daGd60ZKApcptHNAN8u4SjkC4eHbCsmFdVxJksBATSDtfKZiLp4sQ==
+  template:
+    metadata:
+      annotations:
+        argocd.argoproj.io/sync-wave: '83'
+        opendatahub.io/connection-type: s3
+        openshift.io/display-name: External S3 Storage Data Connection
+      creationTimestamp: null
+      labels:
+        opendatahub.io/dashboard: 'true'
+        opendatahub.io/managed: 'true'
+      name: ds-pipeline-extobjstor-creds
+      namespace: crm-test-project

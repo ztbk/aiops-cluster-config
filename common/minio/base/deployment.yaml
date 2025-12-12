@@ -1,0 +1,74 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: minio
+  labels:
+    app: minio
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: minio
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: minio
+    spec:
+      containers:
+      - name: minio
+        args:
+        - minio server /data --certs-dir /.minio/certs --console-address :9090
+        command:
+        - /bin/bash
+        - -c
+        image: 'quay.io/minio/minio:RELEASE.2023-10-16T04-13-43Z'
+        envFrom:
+        - secretRef:
+            name: minio-root-user
+        ports:
+        - containerPort: 9000
+          protocol: TCP
+          name: api
+        - containerPort: 9090
+          protocol: TCP
+          name: console
+        resources:
+          requests:
+            cpu: 200m
+            memory: 1Gi
+          limits:
+            cpu: 250m
+            memory: 2Gi
+        volumeMounts:
+        - mountPath: /data
+          name: minio
+        - name: minio-certs
+          mountPath: /.minio/certs
+        - name: cabundle
+          mountPath: /.minio/certs/CAs
+      volumes:
+      - persistentVolumeClaim:
+          claimName: minio
+        name: minio
+      - name: cabundle
+        configMap:
+          # Automatically created in every ocp namespace
+          name: openshift-service-ca.crt
+          items:
+            - key: service-ca.crt
+              path: public.crt
+          defaultMode: 420
+      - name: minio-certs
+        secret:
+          secretName: minio-certs
+          items:
+            - key: tls.crt
+              path: public.crt
+            - key: tls.key
+              path: private.key
+          defaultMode: 420

@@ -1,0 +1,96 @@
+apiVersion: k8s.mariadb.com/v1alpha1
+kind: MariaDB
+metadata:
+  name: mariadb
+  namespace: mariadb-operator
+spec:
+  primaryConnection:
+    secretTemplate:
+      key: dsn
+    secretName: mariadb-repl-conn-primary
+  port: 3306
+  secondaryService:
+    type: ClusterIP
+  rootPasswordSecretKeyRef:
+    generate: true
+    key: root-password
+    name: mariadb
+  galera:
+    enabled: true
+  metrics:
+    passwordSecretKeyRef:
+      generate: true
+      key: password
+      name: mariadb
+    enabled: true
+  maxScale:
+    auth:
+      metricsPasswordSecretKeyRef:
+        generate: true
+        optional: true
+        key: mariadb
+      serverPasswordSecretKeyRef:
+        generate: true
+        optional: true
+        key: mariadb
+      clientPasswordSecretKeyRef:
+        generate: true
+        optional: true
+        key: mariadb
+      adminPasswordSecretKeyRef:
+        generate: true
+        optional: true
+        key: mariadb
+      monitorPasswordSecretKeyRef:
+        generate: true
+        optional: true
+        key: mariadb
+      syncPasswordSecretKeyRef:
+        generate: true
+        optional: true
+        key: mariadb
+    kubernetesService:
+      type: ClusterIP
+    guiKubernetesService:
+      type: ClusterIP
+  replication:
+    replica:
+      replPasswordSecretKeyRef:
+        generate: true
+        key: max-repl-conn
+        name: mariadb
+  secondaryConnection:
+    secretTemplate:
+      key: dsn
+    secretName: mariadb-repl-conn-secondary
+  primaryService:
+    type: ClusterIP
+  service:
+    type: ClusterIP
+  storage:
+    size: 1Gi
+    storageClassName: gp3-csi
+  replicas: 1
+  connection:
+    secretTemplate:
+      key: dsn
+    secretName: mariadb-repl-conn
+  myCnfConfigMapKeyRef:
+    optional: true
+    key: mariadb
+  passwordSecretKeyRef:
+    generate: true
+    key: password
+    name: mariadb
+    optional: true
+  database: mariadb
+  myCnf: |
+    [mariadb]
+    bind-address=*
+    default_storage_engine=InnoDB
+    binlog_format=row
+    innodb_autoinc_lock_mode=2
+    max_allowed_packet=256M
+  username: mariadb
+  imagePullPolicy: IfNotPresent
+  serviceAccountName: mariadb

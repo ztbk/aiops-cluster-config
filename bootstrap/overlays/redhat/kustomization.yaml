@@ -1,0 +1,128 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- ../../base
+
+# helmCharts:
+# - name: argocd-app-of-app
+#   version: 0.4.1
+#   repo: https://gnunn-gitops.github.io/helm-charts
+#   valuesFile: values.yaml
+#   namespace: openshift-gitops
+
+secretGenerator:
+- name: git-secret-mlops
+  envs:
+    - .env.redhat.mlops
+  options:
+    labels:
+      argocd.argoproj.io/secret-type: repository
+
+- name: git-secret-mlops-custom-notebooks
+  envs:
+    - .env.redhat.mlops-custom-notebooks
+  options:
+    labels:
+      argocd.argoproj.io/secret-type: repository
+
+- name: git-secret-mlops-cd
+  envs:
+    - .env.redhat.mlops-cd
+  options:
+    labels:
+      argocd.argoproj.io/secret-type: repository
+
+
+patches:
+- patch: |-
+    apiVersion: argoproj.io/v1alpha1
+    kind: AppProject
+    metadata:
+      name: cluster-config
+    spec:
+      sourceRepos:
+      - https://gitlab.consulting.redhat.com/denizbank-ai/mlops-cluster-config.git
+      - https://gitlab.consulting.redhat.com/denizbank-ai/mlops-custom-notebooks.git
+- patch: |-
+    apiVersion: argoproj.io/v1alpha1
+    kind: Application
+    metadata:
+      name: sealed-secrets
+    spec:
+      source:
+        repoURL: https://gitlab.consulting.redhat.com/denizbank-ai/mlops-cluster-config.git
+        targetRevision: main
+- patch: |-
+    apiVersion: argoproj.io/v1alpha1
+    kind: Application
+    metadata:
+      name: rbac
+    spec:
+      source:
+        repoURL: https://gitlab.consulting.redhat.com/denizbank-ai/mlops-cluster-config.git
+        targetRevision: main
+- patch: |-
+    apiVersion: argoproj.io/v1alpha1
+    kind: Application
+    metadata:
+      name: nfd
+    spec:
+      source:
+        repoURL: https://gitlab.consulting.redhat.com/denizbank-ai/mlops-cluster-config.git
+        targetRevision: main
+- patch: |-
+    apiVersion: argoproj.io/v1alpha1
+    kind: Application
+    metadata:
+      name: nvidia-gpu-operator
+    spec:
+      source:
+        repoURL: https://gitlab.consulting.redhat.com/denizbank-ai/mlops-cluster-config.git
+        targetRevision: main
+- patch: |-
+    apiVersion: argoproj.io/v1alpha1
+    kind: Application
+    metadata:
+      name: rhods
+    spec:
+      source:
+        repoURL: https://gitlab.consulting.redhat.com/denizbank-ai/mlops-cluster-config.git
+        targetRevision: main
+- patch: |-
+    apiVersion: argoproj.io/v1alpha1
+    kind: Application
+    metadata:
+      name: postgresdb
+    spec:
+      source:
+        repoURL: https://gitlab.consulting.redhat.com/denizbank-ai/mlops-cluster-config.git
+        targetRevision: main
+- patch: |-
+    apiVersion: argoproj.io/v1alpha1
+    kind: Application
+    metadata:
+      name: pipelines
+    spec:
+      source:
+        repoURL: https://gitlab.consulting.redhat.com/denizbank-ai/mlops-cluster-config.git
+        targetRevision: main
+- patch: |-
+   apiVersion: argoproj.io/v1alpha1
+   kind: Application
+   metadata:
+     name: minio
+   spec:
+     source:
+       repoURL: https://gitlab.consulting.redhat.com/denizbank-ai/mlops-cluster-config.git
+       targetRevision: main
+- patch: |-
+    apiVersion: argoproj.io/v1alpha1
+    kind: Application
+    metadata:
+      name: custom-notebooks
+    spec:
+      source:
+        repoURL: https://gitlab.consulting.redhat.com/denizbank-ai/mlops-custom-notebooks.git
+        targetRevision: main
+        path: manifests/overlays/redhat

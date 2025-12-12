@@ -1,0 +1,127 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- ../redhat
+
+# helmCharts:
+# - name: argocd-app-of-app
+#   version: 0.4.1
+#   repo: https://gnunn-gitops.github.io/helm-charts
+#   valuesFile: values.yaml
+#   namespace: openshift-gitops
+
+patches:
+- patch: |-
+    apiVersion: argoproj.io/v1alpha1
+    kind: Application
+    metadata:
+      name: sealed-secrets
+    spec:
+      source:
+        targetRevision: srikantt-test
+- patch: |-
+    apiVersion: argoproj.io/v1alpha1
+    kind: Application
+    metadata:
+      name: rbac
+    spec:
+      source:
+        targetRevision: srikantt-test
+- patch: |-
+    apiVersion: argoproj.io/v1alpha1
+    kind: Application
+    metadata:
+      name: nfd
+    spec:
+      source:
+        targetRevision: srikantt-test
+- patch: |-
+    apiVersion: argoproj.io/v1alpha1
+    kind: Application
+    metadata:
+      name: nvidia-gpu-operator
+    spec:
+      source:
+        targetRevision: srikantt-test
+- patch: |-
+    apiVersion: argoproj.io/v1alpha1
+    kind: Application
+    metadata:
+      name: rhods
+    spec:
+      source:
+        targetRevision: srikantt-test
+- patch: |-
+    apiVersion: argoproj.io/v1alpha1
+    kind: Application
+    metadata:
+      name: postgresdb
+    spec:
+      source:
+        targetRevision: srikantt-test
+- patch: |-
+    apiVersion: argoproj.io/v1alpha1
+    kind: Application
+    metadata:
+      name: pipelines
+    spec:
+      source:
+        targetRevision: srikantt-test
+- patch: |-
+   apiVersion: argoproj.io/v1alpha1
+   kind: Application
+   metadata:
+     name: minio
+   spec:
+     source:
+       targetRevision: srikantt-test
+- patch: |-
+    apiVersion: argoproj.io/v1alpha1
+    kind: Application
+    metadata:
+      name: kuadrant
+    spec: 
+      source:
+        targetRevision: srikantt-test
+- patch: |-
+   apiVersion: argoproj.io/v1alpha1
+   kind: Application
+   metadata:
+     name: grafana
+   spec:
+     source:
+       targetRevision: srikantt-test
+- patch: |-
+    apiVersion: argoproj.io/v1alpha1
+    kind: Application
+    metadata:
+      name: otel
+    spec: 
+      source:
+        targetRevision: srikantt-test
+- patch: |-
+    apiVersion: argoproj.io/v1alpha1
+    kind: Application
+    metadata:
+      name: jaeger
+    spec:
+      source:
+        targetRevision: srikantt-test
+- patch: |-
+    apiVersion: argoproj.io/v1alpha1
+    kind: Application
+    metadata:
+      name: kiali
+    spec:
+      source:
+        targetRevision: srikantt-test
+- patch: |-
+   apiVersion: argoproj.io/v1alpha1
+   kind: Application
+   metadata:
+     name: tempo
+   spec:
+     source:
+       targetRevision: srikantt-test
+

@@ -1,0 +1,43 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  #- ../sandbox
+  - ../uat
+patches:
+  - target:
+      group: argoproj.io
+      version: v1alpha1
+      kind: ApplicationSet
+      #name: risk-sandbox-appset
+      name: risk-uat-appset
+    patch: |-
+      - op: replace
+        path: /spec/generators/0/git/repoURL
+        value: 'https://gitlab.consulting.redhat.com/denizbank-ai/mlops-cluster-config.git'
+      - op: replace
+        path: /spec/generators/0/git/revision
+        value: 'srikantt-test'
+      - op: replace
+        path: /spec/template/spec/source/repoURL
+        value: 'https://gitlab.consulting.redhat.com/denizbank-ai/mlops-cluster-config.git'
+      - op: replace
+        path: /spec/template/spec/source/targetRevision
+        value: 'srikantt-test'
+  #- target:
+  #    group: argoproj.io
+  #    version: v1alpha1
+  #    kind: ApplicationSet
+  #    name: crm-sandbox-appset
+  #  patch: |-
+  #    - op: replace
+  #      path: /spec/generators/0/git/repoURL
+  #      value: 'https://gitlab.consulting.redhat.com/denizbank-ai/mlops-cluster-config.git'
+  #    - op: replace
+  #      path: /spec/generators/0/git/revision
+  #      value: 'srikantt-test'
+  #    - op: replace
+  #      path: /spec/template/spec/source/repoURL
+  #      value: 'https://gitlab.consulting.redhat.com/denizbank-ai/mlops-cluster-config.git'
+  #    - op: replace
+  #      path: /spec/template/spec/source/targetRevision
+  #      value: 'srikantt-test'

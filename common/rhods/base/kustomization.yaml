@@ -1,0 +1,55 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+commonLabels:
+  component: rhods
+
+resources:
+- namespace.yaml
+- operatorgroup.yaml
+- subscription.yaml
+- datasciencecluster.yaml
+- ../../installplan-approver-job/base
+#- job-to-add-custom-ca-bundle.yaml
+- odh-dashboard-config.yaml
+- notebook-controller-config.yaml
+- accelerator-profile.yaml
+- a100-40gb-accprof-1g-5gb.yaml
+- a100-40gb-accprof-3g-20gb.yaml
+- a100-40gb-accprof-2g-10gb.yaml
+
+patches:
+- patch: |-
+    - op: replace
+      path: "/spec/template/spec/containers/0/env"
+      value:
+      - name: NAMESPACE
+        value: "redhat-ods-operator"
+    - op: replace
+      path: "/metadata/namespace"
+      value: "redhat-ods-operator"
+  target:
+    kind: Job
+    name: installplan-approver
+- patch: |-
+    - op: replace
+      path: "/metadata/namespace"
+      value: "redhat-ods-operator"
+  target:
+    kind: ServiceAccount
+    name: installplan-approver-job
+- patch: |-
+    - op: replace
+      path: "/metadata/namespace"
+      value: "redhat-ods-operator"
+  target:
+    kind: Role
+    name: installplan-approver
+- patch: |-
+    - op: replace
+      path: "/metadata/namespace"
+      value: "redhat-ods-operator"
+  target:
+    kind: RoleBinding
+    name: installplan-approvers

@@ -1,0 +1,102 @@
+apiVersion: datasciencepipelinesapplications.opendatahub.io/v1alpha1
+kind: DataSciencePipelinesApplication
+metadata:
+  name: dspa
+  namespace: {{ .Values.project.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "85"
+    argocd.argoproj.io/sync-options: '[{"Delete": "false"}]'
+spec:
+  dspVersion: {{ .Values.dspVersion }}
+  apiServer:
+    deploy: {{ .Values.apiServer.deploy }}
+    resources:
+      requests:
+        cpu: {{ .Values.apiServer.resources.requests.cpu }}
+        memory: {{ .Values.apiServer.resources.requests.memory }}
+      limits:
+        cpu: {{ .Values.apiServer.resources.limits.cpu }}
+        memory: {{ .Values.apiServer.resources.limits.memory }}
+    #CABundleFileMountPath: {{ .Values.apiServer.CABundleFileMountPath }}
+    #CABundleFileName: {{ .Values.apiServer.CABundleFileName }}
+    cABundle:
+      configMapKey: {{ .Values.apiServer.cABundle.configMapKey }}
+      configMapName: {{ .Values.apiServer.cABundle.configMapName }}
+    #customServerConfigMap:
+    #  name: {{ .Values.apiServer.customServerConfigMap.name }}
+    #  key: {{ .Values.apiServer.customServerConfigMap.key }}
+    #customKfpLauncherConfigMap: {{ .Values.apiServer.customKfpLauncherConfigMap }}
+    #'When specified, the `data` contents of the `kfp-launcher` ConfigMap that DSPO writes will be fully replaced with the `data` contents of the ConfigMap specified here. This allows the user to fully replace the `data` contents of the kfp-launcher ConfigMap. The `kfp-launcher` component requires a ConfigMap to exist in the namespace where it runs (i.e. the namespace where pipelines run). This ConfigMap contains object storage configuration, as well as pipeline root (object store root path where artifacts will be uploaded) configuration. Currently this ConfigMap *must* be named "kfp-launcher". We currently deploy a default copy of the kfp-launcher ConfigMap via DSPO, but a user may want to provide their own ConfigMap configuration, so that they can specify multiple object storage sources and paths.'
+    
+  workflowController:
+    deploy: {{ .Values.workflowController.deploy }}
+    customConfig: {{ .Values.workflowController.customConfig }}
+  persistenceAgent:
+    deploy: {{ .Values.persistenceAgent.deploy }}
+    numWorkers: {{ .Values.persistenceAgent.numWorkers }}
+    resources:
+      requests:
+        cpu: {{ .Values.persistenceAgent.resources.requests.cpu }}
+        memory: {{ .Values.persistenceAgent.resources.requests.memory }}
+      limits:
+        cpu: {{ .Values.persistenceAgent.resources.limits.cpu }}
+        memory: {{ .Values.persistenceAgent.resources.limits.memory }}
+  scheduledWorkflow:
+    deploy: {{ .Values.scheduledWorkflow.deploy }}
+    cronScheduleTimezone: {{ .Values.scheduledWorkflow.cronScheduleTimezone }}
+    resources:
+      requests:
+        cpu: {{ .Values.scheduledWorkflow.resources.requests.cpu }}
+        memory: {{ .Values.scheduledWorkflow.resources.requests.memory }}
+      limits:
+        cpu: {{ .Values.scheduledWorkflow.resources.limits.cpu }}
+        memory: {{ .Values.scheduledWorkflow.resources.limits.memory }}
+  mlpipelineUI:
+    deploy: {{ .Values.mlpipelineUI.deploy }}
+    image: {{ .Values.mlpipelineUI.image }}
+    resources:
+      requests:
+        cpu: {{ .Values.mlpipelineUI.resources.requests.cpu }}
+        memory: {{ .Values.mlpipelineUI.resources.requests.memory }}
+      limits:
+        cpu: {{ .Values.mlpipelineUI.resources.limits.cpu }}
+        memory: {{ .Values.mlpipelineUI.resources.limits.memory }}
+    configMap: {{ .Values.mlpipelineUI.configMap }}
+  mlmd:
+    deploy: {{ .Values.mlmd.deploy }}
+    envoy:
+      resources:
+        requests:
+          cpu: {{ .Values.mlmd.envoy.resources.requests.cpu }}
+          memory: {{ .Values.mlmd.envoy.resources.requests.memory }}
+        limits:
+          cpu: {{ .Values.mlmd.envoy.resources.limits.cpu }}
+          memory: {{ .Values.mlmd.envoy.resources.limits.memory }}
+    grpc:
+      port: {{ .Values.mlmd.grpc.port }}
+      resources:
+        requests:
+          cpu: {{ .Values.mlmd.grpc.resources.requests.cpu }}
+          memory: {{ .Values.mlmd.grpc.resources.requests.memory }}
+        limits:
+          cpu: {{ .Values.mlmd.grpc.resources.limits.cpu }}
+          memory: {{ .Values.mlmd.grpc.resources.limits.memory }}
+  database:
+    mariaDB:
+      deploy: {{ .Values.database.mariaDB.deploy }}
+      pipelineDBName: {{ .Values.database.mariaDB.pipelineDBName }}
+      pvcSize: {{ .Values.database.mariaDB.pvcSize }}
+      username: {{ .Values.database.mariaDB.username }}
+    customExtraParams: {{ .Values.database.customExtraParams }}
+    disableHealthCheck: {{ .Values.database.disableHealthCheck }}
+  objectStorage:
+    disableHealthCheck: {{ .Values.objectStorage.disableHealthCheck }}
+    externalStorage:
+      scheme: {{ .Values.objectStorage.externalStorage.scheme }}
+      host: {{ .Values.objectStorage.externalStorage.host }}
+      bucket: {{ .Values.objectStorage.externalStorage.bucket }}
+      s3CredentialsSecret:
+        secretName: {{ .Values.objectStorage.externalStorage.s3CredentialsSecret.secretName }}
+        accessKey: {{ .Values.objectStorage.externalStorage.s3CredentialsSecret.accessKey }}
+        secretKey: {{ .Values.objectStorage.externalStorage.s3CredentialsSecret.secretKey }}
+

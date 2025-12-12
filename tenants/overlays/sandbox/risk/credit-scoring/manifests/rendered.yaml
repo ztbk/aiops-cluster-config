@@ -1,0 +1,478 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: '83'
+  name: credit-scoring-sa
+  namespace: risk-credit-scoring
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: '83'
+  name: ds-pipelines-envoy-proxy-tls-dspa
+  namespace: risk-credit-scoring
+---
+apiVersion: v1
+data:
+  viewer-pod-template.json: "\n                    {\n                        \"spec\"\
+    : {\n                            \"serviceAccountName\": \"risk-user\"\n     \
+    \                   }\n                    }\n                    "
+kind: ConfigMap
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: '83'
+  name: ds-pipeline-ui-configmap
+  namespace: risk-credit-scoring
+---
+apiVersion: v1
+data:
+  artifactRepository: "\n                    archiveLogs: false\n                \
+    \    s3:\n                      endpoint: \"http://minio.minio.svc:9000:\"\n \
+    \                     bucket: \"mlpipeline-credit-scoring\"\n                \
+    \      keyFormat: \"artifacts/{{workflow.name}}/{{workflow.creationTimestamp.Y}}/{{workflow.creationTimestamp.m}}/{{workflow.creationTimestamp.d}}/{{pod.name}}\"\
+    \n                      insecure: false\n                      accessKeySecret:\n\
+    \                        name: \"ds-pipeline-extobjstor-creds\"\n            \
+    \            key: \"accesskey\"\n                      secretKeySecret:\n    \
+    \                    name: \"ds-pipeline-extobjstor-creds\"\n                \
+    \        key: \"secretkey\"\n                    containerRuntimeExecutor: emissary\n\
+    \                    executor: |\n                        imagePullPolicy: IfNotPresent\n\
+    \                    "
+  containerRuntimeExecutor: emissary
+  executor: 'imagePullPolicy: IfNotPresent  # TODO
+
+    '
+kind: ConfigMap
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: '83'
+  name: custom-workflow-controller-configmap
+  namespace: risk-credit-scoring
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: '86'
+    openshift.io/description: Workbench Storage
+    openshift.io/display-name: credit-scoring-tensorflow-credit-scoring-notebook-workbench-pvc
+  labels:
+    opendatahub.io/dashboard: 'true'
+  name: credit-scoring-tensorflow-credit-scoring-notebook-workbench-pvc
+  namespace: risk-credit-scoring
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: '83'
+  name: ml-pipeline-role
+  namespace: risk-credit-scoring
+rules:
+- apiGroups:
+  - tekton.dev
+  resources:
+  - pipelines
+  - pipelineruns
+  - tasks
+  - taskruns
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - argoproj.io
+  resources:
+  - workflows
+  - workflowtemplates
+  - cronworkflows
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - kubeflow.org
+  resources:
+  - scheduledworkflows
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - ''
+  resources:
+  - persistentvolumeclaims
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - bind
+  - patch
+  - delete
+- apiGroups:
+  - ''
+  resources:
+  - jobs
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - bind
+  - patch
+  - delete
+- apiGroups:
+  - ''
+  resources:
+  - secrets
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - bitnami.com
+  resources:
+  - sealedsecrets
+  verbs:
+  - get
+  - list
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: '83'
+  name: ds-pipeline-extdb-role
+  namespace: risk-credit-scoring
+rules:
+- apiGroups:
+  - ''
+  resources:
+  - secrets
+  verbs:
+  - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: '83'
+  name: ml-pipeline-rolebinding
+  namespace: risk-credit-scoring
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: ml-pipeline-role
+subjects:
+- kind: ServiceAccount
+  name: credit-scoring-sa
+  namespace: risk-credit-scoring
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: '83'
+  name: ds-pipeline-extdb-rolebinding
+  namespace: risk-credit-scoring
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: ds-pipeline-extdb-role
+subjects:
+- kind: ServiceAccount
+  name: credit-scoring-sa
+  namespace: risk-credit-scoring
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: '86'
+  name: notebook-rolebinding
+  namespace: risk-credit-scoring
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: ml-pipeline-role
+subjects:
+- kind: ServiceAccount
+  name: credit-scoring-notebook
+  namespace: risk-credit-scoring
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: '86'
+  name: notebook-extdb-rolebinding
+  namespace: risk-credit-scoring
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: ds-pipeline-extdb-role
+subjects:
+- kind: ServiceAccount
+  name: credit-scoring-notebook
+  namespace: risk-credit-scoring
+---
+apiVersion: datasciencepipelinesapplications.opendatahub.io/v1alpha1
+kind: DataSciencePipelinesApplication
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: '85'
+  name: dspa
+  namespace: risk-credit-scoring
+spec:
+  apiServer:
+    applyTektonCustomResource: true
+    archiveLogs: true
+    argoDriverImage: quay.io/org/kfp-driver:latest
+    argoLauncherImage: quay.io/org/kfp-launcher:latest
+    artifactImage: quay.io/opendatahub/ds-pipelines-artifact-manager:latest
+    autoUpdatePipelineDefaultVersion: true
+    cABundle:
+      configMapKey: ca.crt
+      configMapName: kube-root-ca.crt
+    cacheImage: registry.redhat.io/ubi8/ubi-minimal@sha256:5d2d4d4dbec470f8ffb679915e2a8ae25ad754cd9193fa966deee1ecb7b3ee00
+    collectMetrics: true
+    dbConfigConMaxLifetimeSec: 120
+    deploy: true
+    image: quay.io/opendatahub/ds-pipelines-api-server:latest
+    injectDefaultScript: true
+    moveResultsImage: registry.redhat.io/ubi8/ubi-micro@sha256:396baed3d689157d96aa7d8988fdfea7eb36684c8335eb391cf1952573e689c1
+    resources:
+      limits:
+        cpu: 500m
+        memory: 1Gi
+      requests:
+        cpu: 250m
+        memory: 500Mi
+    stripEOF: true
+    terminateStatus: Cancelled
+    trackArtifacts: true
+  database:
+    customExtraParams: '{"tls":"false"}'
+    disableHealthCheck: false
+    mariadb:
+      deploy: true
+      pipelineDBName: mlpipeline
+      pvcSize: 10Gi
+      username: mlpipeline
+  dspVersion: v2
+  mlmd:
+    deploy: true
+    envoy:
+      image: registry.redhat.io/openshift-service-mesh/proxyv2-rhel8@sha256:a744c1b386fd5e4f94e43543e829df1bfdd1b564137917372a11da06872f4bcb
+      resources:
+        limits:
+          cpu: 100m
+          memory: 256Mi
+        requests:
+          cpu: 100m
+          memory: 256Mi
+    grpc:
+      image: quay.io/opendatahub/mlmd-grpc-server:latest
+      port: '8080'
+      resources:
+        limits:
+          cpu: 100m
+          memory: 256Mi
+        requests:
+          cpu: 100m
+          memory: 256Mi
+  mlpipelineUI:
+    configMap: ds-pipeline-ui-configmap
+    deploy: true
+    image: quay.io/opendatahub/odh-ml-pipelines-frontend-container:beta-ui
+    resources:
+      limits:
+        cpu: 100m
+        memory: 256Mi
+      requests:
+        cpu: 100m
+        memory: 256Mi
+  objectStorage:
+    disableHealthCheck: false
+    externalStorage:
+      bucket: credit-scoring
+      host: minio.minio.svc:9000
+      port: ''
+      s3CredentialsSecret:
+        accessKey: accesskey
+        secretKey: secretkey
+        secretName: ds-pipeline-extobjstor-creds
+      scheme: http
+      secure: false
+  persistenceAgent:
+    deploy: true
+    image: quay.io/opendatahub/ds-pipelines-persistenceagent:latest
+    numWorkers: 2
+    resources:
+      limits:
+        cpu: 250m
+        memory: 1Gi
+      requests:
+        cpu: 120m
+        memory: 500Mi
+  scheduledWorkflow:
+    cronScheduleTimezone: UTC
+    deploy: true
+    image: quay.io/opendatahub/ds-pipelines-scheduledworkflow:latest
+    resources:
+      limits:
+        cpu: 250m
+        memory: 250Mi
+      requests:
+        cpu: 120m
+        memory: 100Mi
+  workflowController:
+    deploy: true
+---
+apiVersion: kubeflow.org/v1
+kind: Notebook
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: '86'
+    notebooks.opendatahub.io/inject-oauth: 'true'
+    notebooks.opendatahub.io/last-image-selection: tensorflow:2023.2
+    notebooks.opendatahub.io/last-size-selection: Small
+    openshift.io/description: to-predict-the-credit-score
+    openshift.io/display-name: risk-model-for-credit-scoring
+  labels:
+    app: credit-scoring
+    component: credit-scoring-notebook-notebook-instance
+    opendatahub.io/dashboard: 'true'
+    opendatahub.io/odh-managed: 'true'
+    purpose: to-predict-the-credit-score
+  name: credit-scoring-notebook
+  namespace: risk-credit-scoring
+spec:
+  template:
+    spec:
+      containers:
+      - env:
+        - name: NOTEBOOK_ARGS
+          value: --ServerApp.port=8888 --ServerApp.token='' --ServerApp.password=''
+            --ServerApp.base_url=/notebook/risk-credit-scoring/credit-scoring-notebook
+        - name: JUPYTER_IMAGE
+          value: image-registry.openshift-image-registry.svc:5000/redhat-ods-applications/tensorflow:2024.1
+        envFrom:
+        - secretRef:
+            name: ds-pipeline-extobjstor-creds
+        image: image-registry.openshift-image-registry.svc:5000/redhat-ods-applications/tensorflow:2024.1
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /notebook/risk-credit-scoring/credit-scoring-notebook/api
+            port: notebook-port
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          successThreshold: 1
+          timeoutSeconds: 1
+        name: credit-scoring-notebook
+        ports:
+        - containerPort: 8888
+          name: notebook-port
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /notebook/risk-credit-scoring/credit-scoring-notebook/api
+            port: notebook-port
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          successThreshold: 1
+          timeoutSeconds: 1
+        resources:
+          limits:
+            cpu: '4'
+            memory: 16Gi
+          requests:
+            cpu: '2'
+            memory: 8Gi
+        volumeMounts:
+        - mountPath: /opt/app-root/src
+          name: credit-scoring-notebook
+        - mountPath: /dev/shm
+          name: shm
+        workingDir: /opt/app-root/src
+      enableServiceLinks: false
+      serviceAccountName: credit-scoring-notebook
+      volumes:
+      - name: credit-scoring-notebook
+        persistentVolumeClaim:
+          claimName: credit-scoring-tensorflow-credit-scoring-notebook-workbench-pvc
+      - emptyDir:
+          medium: Memory
+          sizeLimit: 30Gi
+        name: shm
+---
+apiVersion: project.openshift.io/v1
+kind: Project
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-options: Replace=true,Force=true
+    argocd.argoproj.io/sync-wave: '82'
+    kubectl.kubernetes.io/last-applied-configuration: null
+    openshift.io/description: 'Auto-generated DataScienceProject for User: risk-user'
+    openshift.io/display-name: credit-scoring
+    openshift.io/requester: risk-user
+  labels:
+    kubernetes.io/metadata.name: risk-credit-scoring
+    modelmesh-enabled: 'true'
+    opendatahub.io/dashboard: 'true'
+  name: risk-credit-scoring
+spec:
+  finalizers:
+  - kubernetes
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  creationTimestamp: null
+  name: ds-pipeline-extobjstor-creds
+  namespace: risk-credit-scoring
+spec:
+  encryptedData:
+    accesskey: AgASbM8IXpbAVPaWruvTkAWBjXxSjPLOGGP/tMpqQlMbL8oAOFmbmyJhciqPLOFpFMBoLCcQkoxpfipdjwN8ZxJicUzZBrZD/ag6e0wV60mJUUQ9Zl773OrnR/d1Cw1OpDKsYfRHwKCpEe9Uw1hdj32hHp0PASpVjlcqQ5wa4xu9V2jC1Tz3SWXtOTdA19110axtvOR7KP98vG9t9S31t7933YrHIYQysaw5rJXSUh5HvL1qDsg7qBT6TwtKfhIgRQjIrmylqwc/m2k0C4x1lZw2RzLpvcghs28ru+TaebVucZmHuSoz2CJ6c5VaUObVcf0IJ+8udnkKd16HV6ZXnQaU0XIoEMoozigpftBD5V79IL3C0S/DDrKPa986XMSlstk6UVEiwILVOQejykIPk52u/rFSAt2iB7Cli4nzdRPIMl0Ekr562bqbOsPcI4GhJXnhGS2iyjM+gJq8F9qQJuycizq4E8324ohGQqN4LBmX+x9CXFWLDrbjj2ErXH5Ss+9OedCnMNiClkYWrMbGcehQsU3G78hL0w2QT9gmrN3SHs0IxEZVl6dlc22HFeVi1cYxyVVTJqrJcgP/2ziQp/gI2ft3V3fFlkTKoyGPHXOrKgxsd6wsEvvsBJ+CP55j3/RSqS1wfYskVrVI6aGvznKdXqcaFLDWA0SKUBJORDUThieVpxB3pNdfnt8T95bPx5ZgNciEty6pjDdBOR9JgdC0
+    secretkey: AgBgil/crWJ29NDrbkqaBmjK/akKeT2gBQYiVSLzAv4B+ir3UIGmxlqe38KRuxHknXZIuelsYt5D0Jjg7iENgJEqUce+zHkX/OctmGzbe7qJ/cZsRNAyGI4rJsCNtHMFEdT/sJz13UFLfAItAEfJkECQE/XF2umWBaDZOVEAbrTCfc/SJtlNOzDp8LPFf7VDdeJ4AtLa2H1iCJ9JS63zqN5O2s9qszRW/kTuvibDvzNesydgYs63Iw7DHGeBtPxhoY1IlFpjQeSivB47HHztFQ8kUzPpA89bOSNafEY9gk2TtAotJUAR0H20NBW+KKvmxKy3GcMHhSZZYJ4s0CfrQPllwVc1923JHObIjhwrCobMhqlKgIP4Dam1fm/2LCp+CTf02K/BPYi9na975Voeu5ORt+XVATReCXYUSK9VivrkpuxyKHBcTjRuLA6J4FDKQHQ/IJh0sjkHWIe1i95A5X05hBqbBoClqaArh7cmfb02bTGgj4m4EevgFv0Fj6LiCTVbtERj0LHO9qqNznrdmyMg9QCl6goHpSdvuRcdo041+F/ADbA/aUW83Z5JvHTRD3213izZh32M1NaubfhF9wWP2sJezT9D0gFGqmg+uVeefK59oymHwB033rOtbRHUiyTitMyAbm2nriKJVsCvNIafGoaiyTBVsQiOPVKekPccv+kg14QOGD7ONGQcCff0xmcXZCpOPAo/CoHUQkAy1JteJN0sI4SSk2eWV9o31FJU8A==
+  template:
+    metadata:
+      annotations:
+        argocd.argoproj.io/sync-wave: '83'
+        opendatahub.io/connection-type: s3
+        openshift.io/display-name: External S3 Storage Data Connection
+      creationTimestamp: null
+      labels:
+        opendatahub.io/dashboard: 'true'
+        opendatahub.io/managed: 'true'
+      name: ds-pipeline-extobjstor-creds
+      namespace: risk-credit-scoring

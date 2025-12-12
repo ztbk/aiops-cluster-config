@@ -1,0 +1,58 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+    argocd.argoproj.io/sync-wave: "4"
+  name: installplan-approver
+spec:
+  template:
+    spec:
+      containers:
+        - image: registry.redhat.io/openshift4/ose-cli:v4.4
+          command:
+            - /bin/bash
+            - -c
+            - |
+              export HOME=/tmp/approver
+
+              echo "Approving operator install.  Waiting a few seconds to make sure the InstallPlan gets created first."
+              sleep ${SLEEP:-30}
+              for subscription in `oc get subscriptions.operators.coreos.com -o jsonpath='{.items[*].metadata.name}' -n ${NAMESPACE}`
+              do
+                echo "Processing subscription '$subscription'"
+
+                INSTALL_PLAN=$(oc get subscriptions.operators.coreos.com --field-selector metadata.name=${subscription} -o jsonpath='{.items[0].status.installPlanRef.name}')
+
+                STARTING_CSV=$(oc get subscriptions.operators.coreos.com --field-selector metadata.name=${subscription} -o jsonpath='{.items[0].spec.startingCSV}')
+                
+                INSTALL_PLAN_VERSION=$(oc get installplan ${INSTALL_PLAN} -o jsonpath="{.spec.clusterServiceVersionNames[0]}")
+
+                echo "Check installplan approved status"
+                approvalStatus=$(oc get installplan $INSTALL_PLAN -o jsonpath="{.spec.approved}")
+                
+                if [[ "${INSTALL_PLAN_VERSION}" == "${STARTING_CSV}" ]]; then 
+                
+                	if [[ "${approvalStatus}" == "false" ]]; then
+
+                  	echo "Approving Subscription $subscription with install plan $installplan"
+                 		 oc patch installplan $INSTALL_PLAN --type=json -p='[{"op":"replace","path": "/spec/approved", "value": true}]'
+                	else
+                  	echo "Install Plan '$INSTALL_PLAN' already approved"
+                	fi
+                else
+                   echo "Install Plan '$INSTALL_PLAN' doesn't match starting CSV"
+                fi
+                	
+              done
+          imagePullPolicy: Always
+          name: installplan-approver
+          env:
+            - name: SLEEP
+              value: "30"
+      dnsPolicy: ClusterFirst
+      restartPolicy: OnFailure
+      serviceAccount: installplan-approver-job
+      serviceAccountName: installplan-approver-job
+      terminationGracePeriodSeconds: 30

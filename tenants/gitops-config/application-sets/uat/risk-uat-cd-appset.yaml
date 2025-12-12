@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: risk-uat-cd-appset
+  namespace: openshift-gitops
+spec:
+  generators:
+    - git:
+        repoURL: 'https://gitlab.consulting.redhat.com/denizbank-ai/mlops-cd.git'
+        revision: srikantt-test
+        directories:
+          - path: 'tenants/overlays/uat/risk/*'
+  template:
+    metadata:
+      name: 'risk-{{path.basename}}-cd-uat'
+    spec:
+      project: 'risk'
+      source:
+        repoURL: 'https://gitlab.consulting.redhat.com/denizbank-ai/mlops-cd.git'
+        targetRevision: srikantt-test
+        path: 'tenants/overlays/uat/risk/{{path.basename}}'
+      destination:
+        server: 'https://kubernetes.default.svc'
+        namespace: 'risk-{{path.basename}}'
+      syncPolicy:
+        syncOptions:
+        - RespectIgnoreDifferences=true
+        - ApplyOutOfSyncOnly=true
+        - ServerSideApply=true
+        automated:
+          selfHeal: true
+          prune: true

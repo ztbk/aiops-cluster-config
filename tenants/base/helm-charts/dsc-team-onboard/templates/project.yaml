@@ -1,0 +1,36 @@
+---
+apiVersion: project.openshift.io/v1
+kind: Project
+metadata:
+  name: {{ .Values.project.name }}
+  labels:
+    kubernetes.io/metadata.name: {{ .Values.project.name }}
+    opendatahub.io/dashboard: "true"
+    modelmesh-enabled: 'false'
+  annotations:
+    argocd.argoproj.io/sync-wave: "82"
+    openshift.io/description: "Auto-generated DataScienceProject for User: {{ .Values.project.user }}"
+    openshift.io/display-name: {{ .Values.project.name }}
+    openshift.io/requester: {{ .Values.project.user }}
+    kubectl.kubernetes.io/last-applied-configuration: null
+    #argocd.argoproj.io/managed-by: argocd
+    argocd.argoproj.io/sync-options: 'Replace=true,Force=true,SkipPrune=true'
+spec:
+  finalizers:
+    - kubernetes
+---
+apiVersion: objectbucket.io/v1alpha1
+kind: ObjectBucketClaim
+metadata:
+  name: {{ .Values.project.name }}
+  labels:
+    opendatahub.io/dashboard: "true"
+  namespace: {{ .Values.project.name }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "83"
+    openshift.io/description: "Auto-generated S3 Bucket for User: {{ .Values.project.user }}"
+    openshift.io/display-name: {{ .Values.project.name }}
+    openshift.io/requester: {{ .Values.project.user }}
+spec:
+  bucketName: {{ .Values.project.name }}
+  storageClassName: openshift-storage.noobaa.io

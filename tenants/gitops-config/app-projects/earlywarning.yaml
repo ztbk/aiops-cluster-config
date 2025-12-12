@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: earlywarning
+  namespace: openshift-gitops
+spec:
+  description: "GitOps AppProject for EarlyWarning tenant"
+  sourceRepos:
+    - '*'
+  destinations:
+    - namespace: 'earlywarning'
+      server: 'https://kubernetes.default.svc'
+    - namespace: 'earlywarning-*'
+      server: 'https://kubernetes.default.svc'
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
+

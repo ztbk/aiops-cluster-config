@@ -1,0 +1,35 @@
+
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: adding-odh-custom-ca-bundle
+  namespace: redhat-ods-operator
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  backoffLimit: 4
+  template:
+    spec:
+      serviceAccount: redhat-ods-operator-controller-manager
+      serviceAccountName: redhat-ods-operator-controller-manager
+      containers:
+      - name: adding-odh-custom-ca-bundle
+        image: image-registry.openshift-image-registry.svc:5000/openshift/tools:latest
+        imagePullPolicy: IfNotPresent
+        command: ["/bin/bash"]
+        args:
+        - -ec
+        - |-
+          oc -n redhat-ods-operator get configmap kube-root-ca.crt -o jsonpath="{.data['ca\.crt']}" > odh-customCA-bundle.crt
+          oc -n redhat-ods-operator get configmap openshift-service-ca.crt -o jsonpath="{.data['service-ca\.crt']}" >> odh-customCA-bundle.crt
+          CA_BUNDLE_FILE=./odh-customCA-bundle.crt
+          if [[ -z "${CA_BUNDLE_FILE}" || ! -f "${CA_BUNDLE_FILE}" ]]; then
+              echo File \"$CA_BUNDLE_FILE\" does not exist of is not a valid .crt file
+              exit 1
+          fi
+
+          echo "Configuring trusted CA bundle in ODH/RHOAI patching DSCInitialization (spec.trustedCABundle.customCABundle)..."
+          oc patch dscinitialization default-dsci --type='json' -p='[{"op":"replace","path":"/spec/trustedCABundle/customCABundle","value":"'"$(awk '{printf "%s\\n", $0}' $CA_BUNDLE_FILE)"'"}]'
+      restartPolicy: Never

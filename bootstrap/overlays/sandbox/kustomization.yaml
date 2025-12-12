@@ -1,0 +1,30 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- ../../base
+
+secretGenerator:
+- name: git-secret-mlops
+  envs:
+    - .env.sandbox.mlops
+  options:
+    labels:
+      argocd.argoproj.io/secret-type: repository
+
+- name: git-secret-mlops-custom-notebooks
+  envs:
+    - .env.sandbox.mlops-custom-notebooks
+  options:
+    labels:
+      argocd.argoproj.io/secret-type: repository
+
+patches:
+- patch: |-
+    apiVersion: argoproj.io/v1alpha1
+    kind: Application
+    metadata:
+      name: sealed-secrets
+    spec:
+      source:
+        path: common/sealed-secrets/overlays/sandbox

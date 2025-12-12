@@ -1,0 +1,132 @@
+project:
+  autoCreate: true
+  name: credit-scoring
+  user: risk-user
+  notebook:
+    type: tensorflow
+    name: credit-scoring-notebook
+    description: to-predict-the-credit-score
+    displayName: risk-model-for-credit-scoring
+    appLabel: credit-scoring
+    image: image-registry.openshift-image-registry.svc:5000/redhat-ods-applications/tensorflow:2024.1
+    oauthInject: true
+    lastImageSelection: tensorflow:2024.1
+    lastSizeSelection: Small
+    storageSizeLimit: 30Gi
+    pvcSize: 20Gi
+    cpuRequest: '2'
+    cpuLimit: '4'
+    memoryRequest: 8Gi
+    memoryLimit: 16Gi
+dspVersion: v2
+apiServer:
+  deploy: true
+  image: quay.io/opendatahub/ds-pipelines-api-server:latest
+  argoLauncherImage: quay.io/org/kfp-launcher:latest
+  argoDriverImage: quay.io/org/kfp-driver:latest
+  resources:
+    requests:
+      cpu: 250m
+      memory: 500Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi
+  cABundle:
+    configMapKey: ca.crt
+    configMapName: kube-root-ca.crt
+  customServerConfigMap:
+    name: configmapname
+    key: keyname
+  applyTektonCustomResource: true
+  archiveLogs: true
+  insecure: false
+  artifactImage: quay.io/opendatahub/ds-pipelines-artifact-manager:latest
+  cacheImage: registry.redhat.io/ubi8/ubi-minimal@sha256:5d2d4d4dbec470f8ffb679915e2a8ae25ad754cd9193fa966deee1ecb7b3ee00
+  moveResultsImage: registry.redhat.io/ubi8/ubi-micro@sha256:396baed3d689157d96aa7d8988fdfea7eb36684c8335eb391cf1952573e689c1
+  injectDefaultScript: true
+  stripEOF: true
+  terminateStatus: Cancelled
+  trackArtifacts: true
+  dbConfigConMaxLifetimeSec: 120
+  collectMetrics: true
+  autoUpdatePipelineDefaultVersion: true
+workflowController:
+  image: quay.io/opendatahub/ds-pipelines-argo-workflowcontroller:3.3.10-upstream
+  deploy: true
+  #customConfig: custom-workflow-controller-configmap
+persistenceAgent:
+  deploy: true
+  image: quay.io/opendatahub/ds-pipelines-persistenceagent:latest
+  numWorkers: 2 #number of workers for sync job
+  resources:
+    requests:
+      cpu: 120m
+      memory: 500Mi
+    limits:
+      cpu: 250m
+      memory: 1Gi
+scheduledWorkflow:
+  deploy: true
+  image: quay.io/opendatahub/ds-pipelines-scheduledworkflow:latest
+  cronScheduleTimezone: UTC
+  resources:
+    requests:
+      cpu: 120m
+      memory: 100Mi
+    limits:
+      cpu: 250m
+      memory: 250Mi
+mlpipelineUI:
+  deploy: true
+  image: quay.io/opendatahub/odh-ml-pipelines-frontend-container:beta-ui
+  resources:
+    limits:
+      cpu: 100m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+  configMap: ds-pipeline-ui-configmap
+mlmd:
+  deploy: true
+  envoy:
+    image: registry.redhat.io/openshift-service-mesh/proxyv2-rhel8@sha256:a744c1b386fd5e4f94e43543e829df1bfdd1b564137917372a11da06872f4bcb
+    resources:
+      limits:
+        cpu: 100m
+        memory: 256Mi
+      requests:
+        cpu: 100m
+        memory: 256Mi
+  grpc:
+    image: quay.io/opendatahub/mlmd-grpc-server:latest
+    port: "8080"
+    resources:
+      limits:
+        cpu: 100m
+        memory: 256Mi
+      requests:
+        cpu: 100m
+        memory: 256Mi
+database:
+  mariadb:
+    deploy: true
+    pipelineDBName: mlpipeline
+    pvcSize: 10Gi
+    username: mlpipeline
+  customExtraParams: '{"tls":"false"}'
+  disableHealthCheck: false
+objectStorage:
+  disableHealthCheck: false
+  externalStorage:
+    #host: os.apps.datascience.sndbox.intertech.com.tr
+    host: 'minio.minio.svc:9000'
+    port: ''
+    bucket: credit-scoring
+    secure: false
+    scheme: http
+    basePath: pipeline-metadata
+    s3CredentialsSecret:
+      secretName: ds-pipeline-extobjstor-creds
+      accessKey: accesskey
+      secretKey: secretkey

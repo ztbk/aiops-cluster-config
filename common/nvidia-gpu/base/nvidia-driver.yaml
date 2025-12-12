@@ -1,0 +1,34 @@
+apiVersion: nvidia.com/v1alpha1
+kind: NVIDIADriver
+metadata:
+  name: gpu-driver
+  annotations:
+    argocd.argoproj.io/sync-wave: "4"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  licensingConfig:
+    name: ''
+    nlsEnabled: true
+  nodeSelector: {}
+  driverType: gpu
+  certConfig:
+    name: ''
+  repository: nvcr.io/nvidia
+  kernelModuleConfig:
+    name: ''
+  manager: {}
+  imagePullPolicy: IfNotPresent
+  repoConfig:
+    name: ''
+  version: 550.144.03
+  image: driver
+  virtualTopologyConfig:
+    name: ''
+  tolerations:
+    - effect: NoSchedule
+      key: nvidia-gpu-only
+      operator: Exists
+    - effect: NoSchedule
+      key: nvidia.com/gpu
+      operator: Equal
+      value: NVIDIA-A100-SHARED

@@ -1,0 +1,26 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: openshift-nfd
+
+commonLabels:
+  component: nfd
+
+resources:
+- namespace.yaml
+- operatorgroup.yaml
+- subscription.yaml
+- nodefeature.yaml
+- ../../installplan-approver-job/base
+
+patches:
+- patch: |-
+    - op: replace
+      path: "/spec/template/spec/containers/0/env"
+      value:
+      - name: NAMESPACE
+        value: "openshift-nfd"
+  target:
+    kind: Job
+    name: installplan-approver

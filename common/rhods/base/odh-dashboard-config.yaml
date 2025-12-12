@@ -1,0 +1,100 @@
+apiVersion: opendatahub.io/v1alpha
+kind: OdhDashboardConfig
+metadata:
+  name: odh-dashboard-config
+  namespace: redhat-ods-applications
+  annotations:
+    argocd.argoproj.io/sync-wave: '5'
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    openshift.io/requester: argocd
+spec:
+  dashboardConfig:
+    enablement: true
+    disableProjects: false
+    disableSupport: false
+    disablePipelines: false
+    disableProjectSharing: false
+    disableModelServing: false
+    disableKServe: false
+    disableDistributedWorkloads: false
+    disableCustomServingRuntimes: false
+    disableModelMesh: false
+    disableISVBadges: false
+    disableUserManagement: false
+    disableInfo: false
+    disableClusterManager: false
+    disableBYONImageStream: false
+    disableTracking: false
+    disablePerformanceMetrics: false
+    modelMetricsNamespace: false
+    disableAcceleratorProfile: false
+  groupsConfig:
+    adminGroups: 'rhods-admins'
+    allowedGroups: 'system:authenticated'
+  modelServerSizes:
+    - name: Small
+      resources:
+        limits:
+          cpu: '2'
+          memory: 8Gi
+        requests:
+          cpu: '1'
+          memory: 4Gi
+    - name: Medium
+      resources:
+        limits:
+          cpu: '8'
+          memory: 10Gi
+        requests:
+          cpu: '4'
+          memory: 8Gi
+    - name: Large
+      resources:
+        limits:
+          cpu: '10'
+          memory: 20Gi
+        requests:
+          cpu: '6'
+          memory: 16Gi
+  notebookController:
+    enabled: true
+    #notebookNamespace: rhods-notebooks
+    pvcSize: 10Gi
+    #gpuSetting: '4'
+    notebookTolerationSettings:
+      enabled: true
+      key: NotebooksOnly
+  notebookSizes:
+    - name: Small
+      resources:
+        limits:
+          cpu: '2'
+          memory: 2Gi
+        requests:
+          cpu: '1'
+          memory: 1Gi
+    - name: Medium
+      resources:
+        limits:
+          cpu: '4'
+          memory: 4Gi
+        requests:
+          cpu: '2'
+          memory: 2Gi
+    - name: Large
+      resources:
+        limits:
+          cpu: '8'
+          memory: 8Gi
+        requests:
+          cpu: '4'
+          memory: 4Gi
+  templateOrder:
+    - caikit-tgis-runtime
+    - kserve-ovms
+    - mlserver
+    - ovms
+    - vllm
+    - tgis-grpc-runtime
+    - torchserve
+    - triton

@@ -1,0 +1,125 @@
+project:
+  autoCreate: true
+  name: your-project-name
+  user: your-username
+  bucket: your-bucket-name
+  notebook:
+    type: chosen-model-framework
+    name: your-notebook-name
+    description: purpose-of-this-notebook
+    displayName: your-notebook-displayname
+    appLabel: label-your-app
+    image: your-expected-notebook-image
+    oauthInject: true
+    lastImageSelection: tensorflow:2023.2
+    lastSizeSelection: Small
+    storageSizeLimit: 30Gi
+    pvcSize: 20Gi
+    cpuRequest: 2
+    cpuLimit: 4
+    gpu: 'No'
+    mig: 'No'
+    notebookSize: 'Small'
+    memoryRequest: 8Gi
+    memoryLimit: 16Gi
+dspVersion: v2
+apiServer:
+  deploy: true
+  enableSamplePipeline: true
+  resources:
+    requests:
+      cpu: 250m
+      memory: 500Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi
+  cABundle:
+    configMapKey: ca.crt
+    configMapName: kube-root-ca.crt
+  customServerConfigMap:
+    name: configmapname
+    key: keyname
+  insecure: false
+
+workflowController:
+  deploy: true
+  #customConfig: custom-workflow-controller-configmap
+
+persistenceAgent:
+  deploy: true
+  numWorkers: 2 #number of workers for sync job
+  resources:
+    requests:
+      cpu: 120m
+      memory: 500Mi
+    limits:
+      cpu: 250m
+      memory: 1Gi
+scheduledWorkflow:
+  deploy: true
+  cronScheduleTimezone: UTC
+  resources:
+    requests:
+      cpu: 120m
+      memory: 100Mi
+    limits:
+      cpu: 250m
+      memory: 250Mi
+mlpipelineUI:
+  deploy: true
+  image: quay.io/opendatahub/odh-ml-pipelines-frontend-container:beta-ui
+  resources:
+    limits:
+      cpu: 100m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+  configMap: ds-pipeline-ui-configmap
+mlmd:
+  deploy: true
+  envoy:
+    resources:
+      limits:
+        cpu: 100m
+        memory: 256Mi
+      requests:
+        cpu: 100m
+        memory: 256Mi
+  grpc:
+    port: "8080"
+    resources:
+      limits:
+        cpu: 100m
+        memory: 256Mi
+      requests:
+        cpu: 100m
+        memory: 256Mi
+database:
+  mariaDB:
+    deploy: true
+    pipelineDBName: mlpipeline
+    pvcSize: 10Gi
+    username: mlpipeline
+  disableHealthCheck: false
+  customExtraParams: '{"tls":"true"}'
+  #externalDB:
+  #  host: hippo-primary.postgres-operator.svc
+  #  port: 5432
+  #  username: dspa
+  #  pipelineDBName: mlpipelineDB
+  #  passwordSecret:
+  #    name: hippo-pguser-dspa
+  #    key: password
+objectStorage:
+  disableHealthCheck: false
+  externalStorage:
+    host: minio
+    port: 9000
+    bucket: projectname-mlpipeline
+    scheme: https
+    basePath: pipeline-metadata
+    s3CredentialsSecret:
+      secretName: ds-pipeline-extobjstor-creds
+      accessKey: AWS_ACCESS_KEY_ID
+      secretKey: AWS_SECRET_ACCESS_KEY

@@ -1,0 +1,16 @@
+apiVersion: dashboard.opendatahub.io/v1
+kind: AcceleratorProfile
+metadata:
+  name: a100-40gb-mig-accprof-2g-10gb
+  namespace: redhat-ods-applications
+  annotations:
+    argocd.argoproj.io/sync-wave: "7"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  displayName: Nvidia-A100-40GB-MIG-2g-10gb
+  enabled: true
+  identifier: nvidia.com/mig-2g.10gb
+  tolerations:
+    - effect: NoSchedule
+      key: nvidia.com/gpu
+      value: NVIDIA-A100-SHARED

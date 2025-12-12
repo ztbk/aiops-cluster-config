@@ -1,0 +1,26 @@
+
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: updating-mig-resource
+  namespace: risk-credit-scoring
+  annotations:
+    argocd.argoproj.io/sync-wave: "86"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  backoffLimit: 4
+  template:
+    spec:
+      serviceAccount: credit-scoring-notebook
+      serviceAccountName: credit-scoring-notebook
+      containers:
+      - name: updating-mig-resource
+        image: image-registry.openshift-image-registry.svc:5000/openshift/tools:latest
+        imagePullPolicy: IfNotPresent
+        command: ["/bin/bash"]
+        args:
+        - -ec
+        - |-
+          oc patch notebook credit-scoring-notebook -n risk-credit-scoring --type=json -p='[{"op": "replace", "path": "/spec/template/spec/containers/0/resources/limits/nvidia.com~1mig-1g.5gb", "value": 2}, {"op": "replace", "path": "/spec/template/spec/containers/0/resources/requests/nvidia.com~1mig-1g.5gb", "value": 1}]'
+      restartPolicy: Never

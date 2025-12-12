@@ -1,0 +1,10 @@
+bin/
+bin/*
+charts
+charts/*
+.env*
+bootstrap/overlays/redhat/.env*
+.DS_Store
+tenants/.DS_Store
+tenants/overlays/.DS_Store
+tenants/base/.DS_Store

@@ -1,0 +1,43 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: risk-uat-appset
+  namespace: openshift-gitops
+spec:
+  generators:
+    - git:
+        repoURL: 'http://tfsmaster:8080/tfs/DefaultCollection/MLOps/_git/MLOps'
+        revision: second
+        directories:
+          - path: 'tenants/overlays/uat/risk/*'
+  template:
+    metadata:
+      name: 'risk-{{path.basename}}-uat'
+      annotations:
+        argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+        argocd.argoproj.io/tracking-method: annotation
+    spec:
+      project: 'risk'
+      source:
+        repoURL: 'http://tfsmaster:8080/tfs/DefaultCollection/MLOps/_git/MLOps'
+        targetRevision: second
+        path: 'tenants/overlays/uat/risk/{{path.basename}}'
+      destination:
+        server: 'https://kubernetes.default.svc'
+        namespace: 'risk-{{path.basename}}'
+      syncPolicy:
+        preserveResourcesOnDeletion: true
+        syncOptions:
+        - RespectIgnoreDifferences=true
+        - ApplyOutOfSyncOnly=true
+        - ServerSideApply=true
+        automated:
+          selfHeal: true
+          prune: false
+      ignoreDifferences:
+      - group: project.openshift.io
+        kind: Project
+        jsonPointers:
+          - /metadata/annotations
+          - /metadata/labels
+

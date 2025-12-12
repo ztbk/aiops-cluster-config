@@ -1,0 +1,5 @@
+# Path: ./config/kustomization.yaml
+configMapGenerator:
+- name: dynamic-configmap
+  files:
+    - values-for-post-renderer-script.yaml

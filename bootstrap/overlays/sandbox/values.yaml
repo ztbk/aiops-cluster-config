@@ -1,0 +1,20 @@
+default:
+  app:
+    enabled: true
+    enableAutoSync: true
+    autoSyncPrune: false
+    project: cluster-config
+    labels:
+      app-source: sandbox
+      repo: cluster-config
+    destination:
+      namespace: openshift-gitops
+      server: https://kubernetes.default.svc
+    source:
+      repoURL: http://tfsmaster:8080/tfs/DefaultCollection/MLOps/_git/MLOps
+      targetRevision: second
+
+projects: {}
+
+applications: {}
+

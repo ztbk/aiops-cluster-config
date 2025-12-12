@@ -1,0 +1,36 @@
+apiVersion: v1
+data:
+  values-for-post-renderer-script.yaml: "project:\n  autoCreate: true\n  name: credit-scoring\n
+    \ user: risk-user\n  notebook:\n    type: pytorch\n    name: credit-scoring-notebook\n
+    \   description: to-predict-the-credit-score\n    displayName: risk-model-for-credit-scoring\n
+    \   appLabel: credit-scoring\n    image: image-registry.openshift-image-registry.svc:5000/redhat-ods-applications/pytorch:2024.2\n
+    \   oauthInject: true\n    lastImageSelection: tensorflow:2024.2\n    lastSizeSelection:
+    Medium\n    notebookSize: Small\n    gpu: 'No'\n    mig: 'No'\n    storageSizeLimit:
+    20Gi\n    pvcSize: 20Gi\n    cpuRequest: '1'\n    cpuLimit: '2'\n    memoryRequest:
+    8Gi\n    memoryLimit: 16Gi\ndspVersion: v2\napiServer:\n  deploy: true\n  resources:\n
+    \   requests:\n      cpu: 250m\n      memory: 500Mi\n    limits:\n      cpu: 500m\n
+    \     memory: 1Gi\n  cABundle:\n    configMapKey: ca.crt\n    configMapName: kube-root-ca.crt\n
+    \ customServerConfigMap:\n    name: configmapname\n    key: keyname\nworkflowController:\n
+    \ deploy: true\n  customConfig: custom-workflow-controller-configmap\npersistenceAgent:\n
+    \ deploy: true\n  numWorkers: 2 #number of workers for sync job\n  resources:\n
+    \   requests:\n      cpu: 120m\n      memory: 500Mi\n    limits:\n      cpu: 250m\n
+    \     memory: 1Gi\nscheduledWorkflow:\n  deploy: true\n  cronScheduleTimezone:
+    UTC\n  resources:\n    requests:\n      cpu: 120m\n      memory: 100Mi\n    limits:\n
+    \     cpu: 250m\n      memory: 250Mi\nmlpipelineUI:\n  deploy: true\n  image:
+    quay.io/opendatahub/odh-ml-pipelines-frontend-container:beta-ui\n  resources:\n
+    \   limits:\n      cpu: 100m\n      memory: 256Mi\n    requests:\n      cpu: 100m\n
+    \     memory: 256Mi\n  configMap: ds-pipeline-ui-configmap\nmlmd:\n  deploy: true\n
+    \ envoy:\n    resources:\n      limits:\n        cpu: 100m\n        memory: 256Mi\n
+    \     requests:\n        cpu: 100m\n        memory: 256Mi\n  grpc:\n    port:
+    \"8080\"\n    resources:\n      limits:\n        cpu: 100m\n        memory: 256Mi\n
+    \     requests:\n        cpu: 100m\n        memory: 256Mi\ndatabase:\n  mariaDB:\n
+    \   deploy: true\n    pipelineDBName: mlpipeline\n    pvcSize: 10Gi\n    username:
+    mlpipeline\n  customExtraParams: '{\"tls\":\"false\"}'\n  disableHealthCheck:
+    false\nobjectStorage:\n  disableHealthCheck: false\n  externalStorage:\n    #host:
+    os.apps.datascience.sndbox.intertech.com.tr\n    host: 'minio-s3-minio.apps.cluster-slnkp.slnkp.sandbox321.opentlc.com'\n
+    \   port: ''\n    bucket: credit-scoring\n    secure: true\n    scheme: https\n
+    \   basePath: pipeline-metadata\n    s3CredentialsSecret:\n      secretName: ds-pipeline-extobjstor-creds\n
+    \     accessKey: AWS_ACCESS_KEY_ID\n      secretKey: AWS_SECRET_ACCESS_KEY\n  "
+kind: ConfigMap
+metadata:
+  name: dynamic-configmap-hf78mt4kh2

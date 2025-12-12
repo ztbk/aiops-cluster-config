@@ -1,0 +1,19 @@
+# Aggregate resources from different projects or components within the Risk tenant
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- namespace.yaml
+- credit-scoring/
+
+# Common ConfigMap or secret that might be used by any app team within Risk tenant
+#configMapGenerator:
+#  - name: notebook-values
+#    files:
+#      - values.yaml
+
+# Any common patches or customizations that apply to all projects within Risk tenant
+#patchesStrategicMerge:
+#  - patch-for-all-risk-projects.yaml
+
