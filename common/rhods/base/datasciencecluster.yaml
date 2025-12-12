@@ -8,26 +8,38 @@ metadata:
   namespace: redhat-ods-operator
 spec:
   components:
-    codeflare:
-      managementState: Removed
-    dashboard:
-      managementState: Managed
-    datasciencepipelines:
-      managementState: Managed
     kserve:
       managementState: Managed
-      serving:
-        ingressGateway:
-          certificate:
-            secretName: knative-serving-cert
-            type: SelfSigned
+      nim:
         managementState: Managed
-        name: knative-serving
-    modelmeshserving:
+      rawDeploymentServiceConfig: Headless
+    modelregistry:
       managementState: Managed
-    ray:
+      registriesNamespace: rhoai-model-registries
+    feastoperator:
       managementState: Removed
     trustyai:
+      eval:
+        lmeval:
+          permitCodeExecution: deny
+          permitOnline: deny
+      managementState: Managed
+    aipipelines:
+      argoWorkflowsControllers:
+        managementState: Managed
+      managementState: Managed
+    ray:
+      managementState: Managed
+    kueue:
+      defaultClusterQueueName: default
+      defaultLocalQueueName: default
       managementState: Removed
     workbenches:
+      managementState: Managed
+      workbenchNamespace: rhods-notebooks
+    dashboard:
+      managementState: Managed
+    llamastackoperator:
+      managementState: Removed
+    trainingoperator:
       managementState: Managed

@@ -13,4 +13,4 @@ spec:
   name: kiali-ossm
   source: redhat-operators
   sourceNamespace: openshift-marketplace
-  startingCSV: kiali-operator.v1.89.8
+  startingCSV: kiali-operator.v2.17.2

@@ -5,7 +5,7 @@ kind: Kustomization
 namespace: openshift-operators
 
 commonLabels:
-  component: kuadrant-operator
+  component: kueue-operator
 
 resources:
 - namespace.yaml
@@ -19,10 +19,10 @@ patches:
       path: "/spec/template/spec/containers/0/env"
       value:
       - name: NAMESPACE
-        value: "kuadrant-system"
+        value: "openshift-kueue-operator"
     - op: replace
       path: "/metadata/name"
-      value: "kuadrant-operator-installplan-approver"
+      value: "kueue-operator-installplan-approver"
   target:
     kind: Job
     name: installplan-approver

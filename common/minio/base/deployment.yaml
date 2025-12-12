@@ -26,7 +26,7 @@ spec:
         command:
         - /bin/bash
         - -c
-        image: 'quay.io/minio/minio:RELEASE.2023-10-16T04-13-43Z'
+        image: 'quay.io/minio/minio:latest'
         envFrom:
         - secretRef:
             name: minio-root-user

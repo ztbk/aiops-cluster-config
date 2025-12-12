@@ -19,7 +19,7 @@ patches:
       name: sealed-secrets
     spec:
       source:
-        targetRevision: srikantt-test
+        targetRevision: main
 - patch: |-
     apiVersion: argoproj.io/v1alpha1
     kind: Application
@@ -27,7 +27,7 @@ patches:
       name: rbac
     spec:
       source:
-        targetRevision: srikantt-test
+        targetRevision: 
 - patch: |-
     apiVersion: argoproj.io/v1alpha1
     kind: Application
@@ -35,7 +35,7 @@ patches:
       name: nfd
     spec:
       source:
-        targetRevision: srikantt-test
+        targetRevision: main
 - patch: |-
     apiVersion: argoproj.io/v1alpha1
     kind: Application
@@ -43,7 +43,7 @@ patches:
       name: nvidia-gpu-operator
     spec:
       source:
-        targetRevision: srikantt-test
+        targetRevision: main
 - patch: |-
     apiVersion: argoproj.io/v1alpha1
     kind: Application
@@ -51,7 +51,7 @@ patches:
       name: rhods
     spec:
       source:
-        targetRevision: srikantt-test
+        targetRevision: main
 - patch: |-
     apiVersion: argoproj.io/v1alpha1
     kind: Application
@@ -59,7 +59,7 @@ patches:
       name: postgresdb
     spec:
       source:
-        targetRevision: srikantt-test
+        targetRevision: main
 - patch: |-
     apiVersion: argoproj.io/v1alpha1
     kind: Application
@@ -67,7 +67,7 @@ patches:
       name: pipelines
     spec:
       source:
-        targetRevision: srikantt-test
+        targetRevision: main
 - patch: |-
    apiVersion: argoproj.io/v1alpha1
    kind: Application
@@ -75,7 +75,7 @@ patches:
      name: minio
    spec:
      source:
-       targetRevision: srikantt-test
+       targetRevision: main
 - patch: |-
     apiVersion: argoproj.io/v1alpha1
     kind: Application
@@ -83,7 +83,23 @@ patches:
       name: kuadrant
     spec: 
       source:
-        targetRevision: srikantt-test
+        targetRevision: main
+- patch: |-
+    apiVersion: argoproj.io/v1alpha1
+    kind: Application
+    metadata:
+      name: kueue
+    spec: 
+      source:
+        targetRevision: main
+- patch: |-
+    apiVersion: argoproj.io/v1alpha1
+    kind: Application
+    metadata:
+      name: lws
+    spec: 
+      source:
+        targetRevision: main
 - patch: |-
    apiVersion: argoproj.io/v1alpha1
    kind: Application
@@ -91,7 +107,7 @@ patches:
      name: grafana
    spec:
      source:
-       targetRevision: srikantt-test
+       targetRevision: main
 - patch: |-
     apiVersion: argoproj.io/v1alpha1
     kind: Application
@@ -99,15 +115,8 @@ patches:
       name: otel
     spec: 
       source:
-        targetRevision: srikantt-test
-- patch: |-
-    apiVersion: argoproj.io/v1alpha1
-    kind: Application
-    metadata:
-      name: jaeger
-    spec:
-      source:
-        targetRevision: srikantt-test
+        targetRevision: main
+
 - patch: |-
     apiVersion: argoproj.io/v1alpha1
     kind: Application
@@ -115,7 +124,7 @@ patches:
       name: kiali
     spec:
       source:
-        targetRevision: srikantt-test
+        targetRevision: main
 - patch: |-
    apiVersion: argoproj.io/v1alpha1
    kind: Application
@@ -123,5 +132,5 @@ patches:
      name: tempo
    spec:
      source:
-       targetRevision: srikantt-test
+       targetRevision: main
 

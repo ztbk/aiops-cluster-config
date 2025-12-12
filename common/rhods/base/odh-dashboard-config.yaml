@@ -27,7 +27,7 @@ spec:
     disableTracking: false
     disablePerformanceMetrics: false
     modelMetricsNamespace: false
-    disableAcceleratorProfile: false
+    disableHardwareProfile: false
   groupsConfig:
     adminGroups: 'rhods-admins'
     allowedGroups: 'system:authenticated'

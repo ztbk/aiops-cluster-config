@@ -11,7 +11,7 @@ default:
       namespace: openshift-gitops
       server: https://kubernetes.default.svc
     source:
-      repoURL: https://gitlab.consulting.redhat.com/denizbank-ai/mlops-cluster-config.git
+      repoURL: https://github.com/srikantt/aiops-cluster-config.git
       targetRevision: srikantt-test
 
 projects:
@@ -57,7 +57,7 @@ applications:
   postgresdb:
     project: cluster-config
     annotations:
-      argocd.argoproj.io/sync-wave: '20'
+      argocd.argoproj.io/sync-wave: '19'
     source:
       path: common/postgresdb/base
 
@@ -71,14 +71,14 @@ applications:
   nfd:
     project: cluster-config
     annotations:
-      argocd.argoproj.io/sync-wave: '20'
+      argocd.argoproj.io/sync-wave: '19'
     source:
       path: common/nfd/base
   
   nvidia-gpu-operator:
     project: cluster-config
     annotations:
-      argocd.argoproj.io/sync-wave: '20'
+      argocd.argoproj.io/sync-wave: '19'
     source:
       path: common/nvidia-gpu/base
 
@@ -89,26 +89,40 @@ applications:
     source:
       path: common/rhods/base
   
-  servicemesh:
-    project: cluster-config
-    annotations:
-      argocd.argoproj.io/sync-wave: '19'
-    source:
-      path: common/servicemesh/base
+  #servicemesh:
+  #  project: cluster-config
+  #  annotations:
+  #    argocd.argoproj.io/sync-wave: '19'
+  #  source:
+  #    path: common/servicemesh/base
+#
+  #serverless:
+  #  project: cluster-config
+  #  annotations:
+  #    argocd.argoproj.io/sync-wave: '19'
+  #  source:
+  #    path: common/serverless/base
 
-  serverless:
+  kuadrant:
     project: cluster-config
     annotations:
       argocd.argoproj.io/sync-wave: '19'
     source:
-      path: common/serverless/base
-
-  authorino:
+      path: common/kuadrant/base
+  
+  kueue:
     project: cluster-config
     annotations:
       argocd.argoproj.io/sync-wave: '19'
     source:
-      path: common/authorino/base
+      path: common/kueue/base
+  
+  lws:
+    project: cluster-config
+    annotations:
+      argocd.argoproj.io/sync-wave: '19'
+    source:
+      path: common/lws/base
 
   otel:
     project: cluster-config
@@ -118,39 +132,39 @@ applications:
       path: common/otel/base
 
   tempo:
-    project: cluster-config
-    annotations:
-      argocd.argoproj.io/sync-wave: '19'
-    source:
-      path: common/tempo/base
+   project: cluster-config
+   annotations:
+     argocd.argoproj.io/sync-wave: '19'
+   source:
+     path: common/tempo/base
 
   jaeger:
-    project: cluster-config
-    annotations:
-      argocd.argoproj.io/sync-wave: '19'
-    source:
-      path: common/jaeger/base
+   project: cluster-config
+   annotations:
+     argocd.argoproj.io/sync-wave: '19'
+   source:
+     path: common/jaeger/base
 
   kiali:
-    project: cluster-config
-    annotations:
-      argocd.argoproj.io/sync-wave: '19'
-    source:
-      path: common/kiali/base
-
+   project: cluster-config
+   annotations:
+     argocd.argoproj.io/sync-wave: '19'
+   source:
+     path: common/kiali/base
+     
   grafana:
-    project: cluster-config
-    annotations:
-      argocd.argoproj.io/sync-wave: '19'
-    source:
-      path: common/grafana/instance
-
-  custom-notebooks:
-    project: cluster-config
-    annotations:
-      argocd.argoproj.io/sync-wave: '20'
-    source:
-      repoURL: https://gitlab.consulting.redhat.com/denizbank-ai/mlops-custom-notebooks.git
-      targetRevision: main
-      path: manifests/base
+   project: cluster-config
+   annotations:
+     argocd.argoproj.io/sync-wave: '19'
+   source:
+     path: common/grafana/instance
+  
+   #custom-notebooks:
+  #  project: cluster-config
+  #  annotations:
+  #    argocd.argoproj.io/sync-wave: '20'
+  #  source:
+  #    repoURL: https://gitlab.consulting.redhat.com/denizbank-ai/mlops-custom-notebooks.git
+  #    targetRevision: main
+  #    path: manifests/base
 
