@@ -78,3 +78,4 @@ I am also a big fan of separating the cluster configuration use case from applic
 # Other Notes
 
 I am using annotation tracking with Argo CD and as result am not using IgnoreExtraneous (though I may still have some historical examples in the repo). Annotation tracking provides more capabilities then the default label tracking and should always be used to mitigate false positives from operator created resources.
+
