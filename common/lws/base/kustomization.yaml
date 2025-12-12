@@ -22,7 +22,7 @@ patches:
         value: "openshift-kueue-operator"
     - op: replace
       path: "/metadata/name"
-      value: "kueue-operator-installplan-approver"
+      value: "lws-operator-installplan-approver"
   target:
     kind: Job
     name: installplan-approver
