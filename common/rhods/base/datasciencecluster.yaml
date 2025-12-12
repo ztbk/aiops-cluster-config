@@ -40,6 +40,6 @@ spec:
     dashboard:
       managementState: Managed
     llamastackoperator:
-      managementState: Removed
+      managementState: Managed
     trainingoperator:
       managementState: Managed
