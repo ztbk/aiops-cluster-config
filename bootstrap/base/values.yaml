@@ -12,7 +12,7 @@ default:
       server: https://kubernetes.default.svc
     source:
       repoURL: https://github.com/srikantt/aiops-cluster-config.git
-      targetRevision: srikantt-test
+      targetRevision: main
 
 projects:
   cluster-config:
@@ -22,8 +22,8 @@ projects:
     description: Project for overall cluster configuration
     namespace: openshift-gitops
     sourceRepos:
-    - https://gitlab.consulting.redhat.com/denizbank-ai/mlops-cluster-config.git
-    - https://gitlab.consulting.redhat.com/denizbank-ai/mlops-custom-notebooks.git
+    - https://github.com/ztbk/aiops-cluster-config.git
+    # - https://gitlab.consulting.redhat.com/denizbank-ai/mlops-custom-notebooks.git
     destinations: |
       - namespace: '*'
         server: https://kubernetes.default.svc
@@ -151,7 +151,7 @@ applications:
      argocd.argoproj.io/sync-wave: '19'
    source:
      path: common/kiali/base
-     
+
   grafana:
    project: cluster-config
    annotations:
