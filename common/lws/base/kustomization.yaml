@@ -19,7 +19,7 @@ patches:
       path: "/spec/template/spec/containers/0/env"
       value:
       - name: NAMESPACE
-        value: "openshift-kueue-operator"
+        value: "openshift-lws-operator"
     - op: replace
       path: "/metadata/name"
       value: "lws-operator-installplan-approver"
