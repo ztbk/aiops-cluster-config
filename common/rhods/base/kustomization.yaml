@@ -14,10 +14,10 @@ resources:
 #- job-to-add-custom-ca-bundle.yaml
 - odh-dashboard-config.yaml
 - notebook-controller-config.yaml
-- accelerator-profile.yaml
-- a100-40gb-accprof-1g-5gb.yaml
-- a100-40gb-accprof-3g-20gb.yaml
-- a100-40gb-accprof-2g-10gb.yaml
+#- accelerator-profile.yaml
+#- a100-40gb-accprof-1g-5gb.yaml
+#- a100-40gb-accprof-3g-20gb.yaml
+#- a100-40gb-accprof-2g-10gb.yaml
 
 patches:
 - patch: |-

@@ -12,6 +12,7 @@ resources:
 - operatorgroup.yaml
 - subscription.yaml
 - ../../installplan-approver-job/base
+- kuadrant.yaml
 
 patches:
 - patch: |-

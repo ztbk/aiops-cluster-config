@@ -71,7 +71,7 @@ applications:
   nfd:
     project: cluster-config
     annotations:
-      argocd.argoproj.io/sync-wave: '19'
+      argocd.argoproj.io/sync-wave: '18'
     source:
       path: common/nfd/base
   

@@ -1,0 +1,8 @@
+apiVersion: kuadrant.io/v1beta1
+kind: Kuadrant
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "4"
+  name: kuadrant-sample
+  namespace: kuadrant-system
+spec: {}
