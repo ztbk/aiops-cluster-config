@@ -1,7 +1,5 @@
 bin/
 bin/*
-charts
-charts/*
 .env*
 bootstrap/overlays/redhat/.env*
 .DS_Store
