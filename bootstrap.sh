@@ -56,7 +56,7 @@ spec:
   name: openshift-gitops-operator
   source: redhat-operators
   sourceNamespace: openshift-marketplace
-  startingCSV: openshift-gitops-operator.v1.15.0
+  startingCSV: openshift-gitops-operator.v1.18.1
 EOF
 
   # approve new installplan

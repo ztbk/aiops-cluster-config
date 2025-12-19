@@ -71,7 +71,7 @@ spec:
   mig:
     strategy: mixed
   migManager:
-    enabled: true
+    enabled: false
     config:
       name: custom-mig-parted-config
   nodeStatusExporter:
