@@ -27,7 +27,12 @@ spec:
     disableTracking: false
     disablePerformanceMetrics: false
     modelMetricsNamespace: false
+    genAiStudio: true
+    modelAsService: true
+    disableLMEval: false
     disableHardwareProfile: false
+    disableModelRegistry: false
+    disableModelRegistrySecureDB: false
   groupsConfig:
     adminGroups: 'rhods-admins'
     allowedGroups: 'system:authenticated'
